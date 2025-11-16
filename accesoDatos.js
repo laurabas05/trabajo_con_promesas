@@ -24,7 +24,7 @@ function leerDatos() {
 
 // funcion creada x mi para guardar el objeto en el fichero.
 function guardarDatos(datos) {
-    // convierte el objeto a formato json y devuelve una promesa
+    // convierte el objeto a json y devuelve una promesa
     // q se resuelve cuando la escritura termina correctamente
     return fs.writeFile(ficheroDatos, JSON.stringify(datos));
 }
@@ -83,7 +83,7 @@ function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
         }
 
         // indiceGasto = posicion en la que está el gasto que se quiere actualizar
-        const indiceGasto = lista.findIndex(g => g.id == gastoId);
+        const indiceGasto = lista.findIndex(g => g.id === gastoId);
         // si no se encuentra, lanza error
         if (indiceGasto == -1) {
             throw new Error('El gasto no existe');
@@ -94,7 +94,6 @@ function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
 
         // reemplazo el gasto antiguo por el objeto nuevo
         lista[indiceGasto] = actualizado;
-        datos[usuario] = lista;
 
         // escribe los datos modificados en el fichero
         // resuelve la promesa con el objeto actualizado
@@ -114,16 +113,16 @@ function borrarGastoUsuario(usuario, gastoId) {
             throw new Error('El usuario no existe');
         }
 
-        const indiceGasto = lista.findIndex(g => g.id == gastoId);
+        const indiceGasto = lista.findIndex(g => g.id === gastoId);
         if (indiceGasto === -1) {
             throw new Error('El gasto no existe');
         }
 
         // elimina el elemento en la posicion indice.
         // [0] toma el primer (el eliminado).
-        const eliminado = lista.splice(indice, 1)[0];
+        const eliminado = lista.splice(indiceGasto, 1)[0];
 
-        // escribe el fichero actualizado y resuelve con el gasto eliminado.acc 
+        // escribe el fichero actualizado y resuelve con el gasto eliminado
         return guardarDatos(datos).then(() => eliminado);
     });
 
