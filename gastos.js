@@ -21,8 +21,8 @@ function obtenerGastosUsuario(usuario) {
         if (!datos[usuario]) {
             return [];
         }
-        return datos[usuario]
-    })
+        return datos[usuario];
+    });
 }
 
 // funcion q añade un gasto a un usuario
@@ -62,5 +62,25 @@ function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
         Object.assign(gasto, nuevosDatos);
 
         return guardarDatos(datos).then(() => gasto);
-    })
+    });
+}
+
+// funcion q borra un gasto de un usuario mediante id del gasto
+function borrarGastoUsuario(usuario, gastoId) {
+    return leerDatos().then(datos => {
+        
+        const lista = datos[usuario];
+        if (!lista) {
+            throw new Error('El usuario no existe');
+        }
+
+        const indice = lista.findIndex(g => g.id == gastoId);
+        if (indice === -1) {
+            throw new Error('El gasto no existe');
+        }
+
+        const eliminado = lista.splice(indice, 1)[0];
+
+        return guardarDatos(datos).then(() => eliminado);
+    });
 }
