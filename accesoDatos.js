@@ -14,15 +14,19 @@ function cambiarFicheroDatos(nombre) {
     ficheroDatos = nombre;
 }
 
-// funcion para leer el fichero y convertirlo a objeto js
+// funcion creada x mi para leer el fichero.
 function leerDatos() {
+    // se lee el fichero como texto y devuelve una promesa
     return fs.readFile(ficheroDatos, 'utf8')
+        // cuando se recibe el texto, se convierte el json en un objeto
         .then(texto => JSON.parse(texto));
 }
 
-// funcion para guardar el objeto en el fichero
+// funcion creada x mi para guardar el objeto en el fichero.
 function guardarDatos(datos) {
-    return fs.writeFile(ficheroDatos, JSON.stringify(datos, null, 2));
+    // convierte el objeto a formato json y devuelve una promesa
+    // q se resuelve cuando la escritura termina correctamente
+    return fs.writeFile(ficheroDatos, JSON.stringify(datos));
 }
 
 // Debe devolver una promesa que cuando se resuelva devuelva el array de gastos del usuario
@@ -30,10 +34,11 @@ function obtenerGastosUsuario(usuario) {
 
     // se lee el contenido del fichero
     return leerDatos().then(datos => {
-        // si el usuario no existe, se devuelve un array vacío
+        // si el usuario no existe en datos, se devuelve un array vacío
         if (!datos[usuario]) {
             return [];
         }
+        // si el usuario existe, devuelve el array de gastos del usuario
         return datos[usuario];
     });
 
@@ -44,18 +49,21 @@ function obtenerGastosUsuario(usuario) {
 function anyadirGastoUsuario(usuario, gasto) {
 
     return leerDatos().then(datos => {
-        // si el usuario no existe, se crea
+        // si el usuario no existe en datos, se crea
         if (!datos[usuario]) {
             datos[usuario] = [];
         }
         
-        // si el gasto no tiene id, se genera uno
+        // si el gasto no tiene id, se genera uno usando la hora actual
         if (!gasto.id) {
             gasto.id = Date.now().toString();
         }
 
+        // añade el objeto gasto al array del usuario
         datos[usuario].push(gasto);
 
+        // escribe el objeto completo datos en el fichero y
+        // resuelve con el propio gasto insertado.
         return guardarDatos(datos).then(() => gasto);
     });
 
@@ -67,24 +75,29 @@ function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
 
     return leerDatos().then(datos => {
 
+        // lista = array de gastos del usuario
         const lista = datos[usuario];
+        // si no existe el usuario, lanza error
         if (!lista) {
             throw new Error('El usuario no existe');
         }
 
+        // indiceGasto = posicion en la que está el gasto que se quiere actualizar
         const indiceGasto = lista.findIndex(g => g.id == gastoId);
+        // si no se encuentra, lanza error
         if (indiceGasto == -1) {
             throw new Error('El gasto no existe');
         }
 
-        // objeto q solo contiene los nuevos datos.
-        // me aseguro de dejar el id correcto
+        // copia las propiedades de nuevosDatos y asegura la id con gastoId
         const actualizado = Object.assign({}, nuevosDatos, { id: gastoId });
 
         // reemplazo el gasto antiguo por el objeto nuevo
         lista[indiceGasto] = actualizado;
         datos[usuario] = lista;
 
+        // escribe los datos modificados en el fichero
+        // resuelve la promesa con el objeto actualizado
         return guardarDatos(datos).then(() => actualizado);
     });
 
@@ -101,13 +114,16 @@ function borrarGastoUsuario(usuario, gastoId) {
             throw new Error('El usuario no existe');
         }
 
-        const indice = lista.findIndex(g => g.id == gastoId);
-        if (indice === -1) {
+        const indiceGasto = lista.findIndex(g => g.id == gastoId);
+        if (indiceGasto === -1) {
             throw new Error('El gasto no existe');
         }
 
+        // elimina el elemento en la posicion indice.
+        // [0] toma el primer (el eliminado).
         const eliminado = lista.splice(indice, 1)[0];
 
+        // escribe el fichero actualizado y resuelve con el gasto eliminado.acc 
         return guardarDatos(datos).then(() => eliminado);
     });
 
