@@ -43,3 +43,24 @@ function anyadirGastoUsuario(usuario, gasto) {
         return guardarDatos(datos).then(() => gasto);
     });
 }
+
+// funcion q actualiza un gasto de un usuario mediante id del gasto
+function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
+    return leerDatos().then(datos => {
+
+        const lista = datos[usuario];
+        if (!lista) {
+            throw new Error('El usuario no existe');
+        }
+
+        const gasto = lista.find(g => g.id == gastoId);
+        if (!gasto) {
+            throw new Error('El gasto no existe');
+        }
+
+        // se actualiza solo lo q se pasa
+        Object.assign(gasto, nuevosDatos);
+
+        return guardarDatos(datos).then(() => gasto);
+    })
+}
