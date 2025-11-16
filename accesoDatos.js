@@ -14,10 +14,28 @@ function cambiarFicheroDatos(nombre) {
     ficheroDatos = nombre;
 }
 
+// funcion para leer el fichero y convertirlo a objeto js
+function leerDatos() {
+    return fs.readFile(ficheroDatos, 'utf8')
+        .then(texto => JSON.parse(texto));
+}
+
+// funcion para guardar el objeto en el fichero
+function guardarDatos(datos) {
+    return fs.writeFile(ficheroDatos, JSON.stringify(datos, null, 2));
+}
+
 // Debe devolver una promesa que cuando se resuelva devuelva el array de gastos del usuario
 function obtenerGastosUsuario(usuario) {
 
-    // TODO
+    // se lee el contenido del fichero
+    return leerDatos().then(datos => {
+        // si el usuario no existe, se devuelve un array vacío
+        if (!datos[usuario]) {
+            return [];
+        }
+        return datos[usuario];
+    });
 
 }
 
@@ -25,7 +43,21 @@ function obtenerGastosUsuario(usuario) {
 // y actualizado el fichero de datos
 function anyadirGastoUsuario(usuario, gasto) {
 
-    // TODO
+    return leerDatos().then(datos => {
+        // si el usuario no existe, se crea
+        if (!datos[usuario]) {
+            datos[usuario] = [];
+        }
+        
+        // si el gasto no tiene id, se genera uno
+        if (!gasto.id) {
+            gasto.id = Date.now().toString();
+        }
+
+        datos[usuario].push(gasto);
+
+        return guardarDatos(datos).then(() => gasto);
+    });
 
 }
 
@@ -33,7 +65,28 @@ function anyadirGastoUsuario(usuario, gasto) {
 // y actualizado el fichero de datos
 function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
 
-    // TODO
+    return leerDatos().then(datos => {
+
+        const lista = datos[usuario];
+        if (!lista) {
+            throw new Error('El usuario no existe');
+        }
+
+        const indiceGasto = lista.findIndex(g => g.id == gastoId);
+        if (indiceGasto == -1) {
+            throw new Error('El gasto no existe');
+        }
+
+        // objeto q solo contiene los nuevos datos.
+        // me aseguro de dejar el id correcto
+        const actualizado = Object.assign({}, nuevosDatos, { id: gastoId });
+
+        // reemplazo el gasto antiguo por el objeto nuevo
+        lista[indiceGasto] = actualizado;
+        datos[usuario] = lista;
+
+        return guardarDatos(datos).then(() => actualizado);
+    });
 
 }
 
@@ -41,7 +94,22 @@ function actualizarGastoUsuario(usuario, gastoId, nuevosDatos) {
 // y actualizado el fichero de datos
 function borrarGastoUsuario(usuario, gastoId) {
 
-    // TODO
+    return leerDatos().then(datos => {
+        
+        const lista = datos[usuario];
+        if (!lista) {
+            throw new Error('El usuario no existe');
+        }
+
+        const indice = lista.findIndex(g => g.id == gastoId);
+        if (indice === -1) {
+            throw new Error('El gasto no existe');
+        }
+
+        const eliminado = lista.splice(indice, 1)[0];
+
+        return guardarDatos(datos).then(() => eliminado);
+    });
 
 }
 
