@@ -24,3 +24,22 @@ function obtenerGastosUsuario(usuario) {
         return datos[usuario]
     })
 }
+
+// funcion q añade un gasto a un usuario
+function anyadirGastoUsuario(usuario, gasto) {
+    return leerDatos().then(datos => {
+        // si el usuario no existe, se crea
+        if (!datos[usuario]) {
+            datos[usuario] = [];
+        }
+        
+        // si el gasto no tiene id, se genera uno
+        if (!gasto.id) {
+            gasto.id = Date.now().toString();
+        }
+
+        datos[usuario].push(gasto);
+
+        return guardarDatos(datos).then(() => gasto);
+    });
+}
